@@ -2,10 +2,38 @@ import pandas as pd
 import math
 
 def fbk_a_coordenadas(ruta_fbk, N_base, E_base, Z_base, N_amarre, E_amarre, Z_amarre, estacion_inicial, estacion_amarre, ruta_resumida):
+
     def convert_topographic_angle(angle_topo):
-        degrees = int(angle_topo)
-        minutes = int((angle_topo - degrees) * 100)
-        seconds = ((angle_topo - degrees) * 100 - minutes) * 100
+        # Convertir el ángulo a flotante para manipulación
+        angle_topo = str(angle_topo).strip()  # Convertir el ángulo a string para manipulación
+
+        # Verificar si el ángulo tiene signo negativo
+        negative = "-" if angle_topo.startswith("-") else ""
+        if negative:
+            angle_topo = angle_topo[1:]  # Eliminar el signo para manejar la parte positiva
+
+        # Asegurarse de que el ángulo tiene al menos 4 dígitos después del punto decimal
+        if '.' not in angle_topo:
+            angle_topo += ".00000"
+
+        # Dividir el ángulo en partes
+        degrees = int(angle_topo.split('.')[0])  # Parte entera, que son los grados
+        decimal_part = angle_topo.split('.')[1]  # Parte decimal
+
+        # Asegurarse de que la parte decimal tenga al menos 5 dígitos (rellenar con ceros si es necesario)
+        decimal_part = decimal_part.ljust(5, '0')  # Rellenar con ceros si es necesario
+
+        # Extraer los minutos, segundos y decimales de segundos
+        minutes = int(decimal_part[:2])  # Los dos primeros dígitos después del punto decimal son los minutos
+        seconds = int(decimal_part[2:4])  # Los dos siguientes dígitos después de los minutos son los segundos
+        decimal_seconds = int(decimal_part[4])  # El siguiente dígito es el decimal de los segundos
+
+        # Eliminar ceros innecesarios: Aplicar solo para los grados
+        degrees = int(degrees)  # Asegurarse de que grados no tenga ceros innecesarios
+        minutes = int(minutes)  # Los minutos deben ser enteros
+        seconds = float(f"{seconds}.{decimal_seconds}")  # Los segundos con su decimal, como flotante
+
+        # Retornar las partes del ángulo por separado (grados, minutos, segundos)
         return degrees, minutes, seconds
 
     def topographic_to_decimal(degrees, minutes, seconds):
@@ -162,4 +190,3 @@ def fbk_a_coordenadas(ruta_fbk, N_base, E_base, Z_base, N_amarre, E_amarre, Z_am
     df_resumido.to_csv(ruta_resumida, index=False)
 
     return df_resultados, df_resumido
-

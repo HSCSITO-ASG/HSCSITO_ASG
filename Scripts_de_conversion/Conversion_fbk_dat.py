@@ -45,9 +45,9 @@ def process_fbk_observations(fbk_path):
                 prism_height = parts[1]
             elif parts[0] in {"AD", "ZD"}:  # Procesar tanto AD como ZD
                 observed_point = parts[2]
-                angle = format_angle(parts[3])  # Convierte el ángulo horizontal o azimut
+                angle = format_topographic_angle(parts[3])  # Convierte el ángulo horizontal o azimut
                 distance = parts[4]
-                vertical_angle = format_angle(parts[5])  # Convierte el ángulo vertical
+                vertical_angle = format_topographic_angle(parts[5])  # Aplica el mismo formato a los ángulos verticales
 
                 observation = (
                     observed_point,
@@ -59,12 +59,10 @@ def process_fbk_observations(fbk_path):
                 )
 
                 if parts[0] == "AD":
-                    current_observations.append(observation)
-                    if backsight and observed_point != current_station:
-                        radiations.append(
-                            f"SS {backsight}-{current_station}-{observed_point} {angle} {distance} {vertical_angle} {instrument_height}/{prism_height}"
-                        )
-                elif parts[0] == "ZD":
+                    general_observations.append(
+                        f"M {current_station}-{backsight}-{observed_point} {angle} {distance} {vertical_angle} {instrument_height}/{prism_height}"
+                    )
+                else:
                     general_observations.append(
                         f"BM {current_station}-{observed_point} {angle} {distance} {vertical_angle} {instrument_height}/{prism_height}"
                     )
@@ -73,69 +71,6 @@ def process_fbk_observations(fbk_path):
             polygonal_data.append((current_station, backsight, current_observations))
 
     return polygonal_data, radiations, general_observations
-
-# Función para filtrar la poligonal principal
-def filter_polygonal(polygonal_data):
-    filtered_polygonal = []
-
-    # Incluir el primer TB basado en el primer backsight
-    if polygonal_data:
-        first_bs = polygonal_data[0][1]
-        filtered_polygonal.append(f"TB {first_bs}")
-
-    # Agregar observaciones que conectan STN principales
-    for i in range(len(polygonal_data) - 1):
-        current_stn, _, current_observations = polygonal_data[i]
-        next_stn, _, _ = polygonal_data[i + 1]
-
-        for obs in current_observations:
-            observed_point, angle, distance, vertical_angle, instrument_height, prism_height = obs
-            if observed_point == next_stn:  # Conexión entre STN actuales
-                filtered_polygonal.append(
-                    f"T {current_stn} {angle} {distance} {vertical_angle} {instrument_height}/{prism_height}"
-                )
-
-    # Incluir la última observación de la última STN
-    if polygonal_data and polygonal_data[-1][2]:
-        last_stn, _, last_observations = polygonal_data[-1]
-        last_obs = last_observations[-1]
-        observed_point, angle, distance, vertical_angle, instrument_height, prism_height = last_obs
-        filtered_polygonal.append(
-            f"T {last_stn} {angle} {distance} {vertical_angle} {instrument_height}/{prism_height}"
-        )
-
-    # Incluir el cierre con TE basado en el último punto observado
-    if polygonal_data and polygonal_data[-1][2]:
-        last_point = polygonal_data[-1][2][-1][0]
-        filtered_polygonal.append(f"TE {last_point}")
-
-    return filtered_polygonal
-
-# Función para filtrar radiaciones innecesarias
-def filter_radiations(radiations, polygonal_data):
-    if len(polygonal_data) < 2:
-        return radiations  # Si no hay suficientes datos de poligonal, no se filtran radiaciones
-
-    polygonal_combinations = set()
-    for i in range(len(polygonal_data) - 1):
-        current_stn = polygonal_data[i][0]
-        next_stn = polygonal_data[i + 1][0]
-        if i == 0:
-            polygonal_combinations.add((polygonal_data[i][1], current_stn, next_stn))
-        else:
-            polygonal_combinations.add((polygonal_data[i - 1][0], current_stn, next_stn))
-    polygonal_combinations.add((polygonal_data[-2][0], polygonal_data[-1][0], polygonal_data[-1][2][-1][0]))
-
-    filtered_radiations = []
-    for rad in radiations:
-        parts = rad.split()
-        key = tuple(parts[1].split('-'))
-        if key not in polygonal_combinations:
-            # Intercambiar el orden de los dos primeros valores en radiaciones
-            swapped_key = f"{key[1]}-{key[0]}-{key[2]}"
-            filtered_radiations.append(rad.replace(parts[1], swapped_key))
-
-    return filtered_radiations
 
 # Función para generar el archivo DAT
 def generate_dat_file(csv_path, fbk_path, output_dat_path):
@@ -148,29 +83,41 @@ def generate_dat_file(csv_path, fbk_path, output_dat_path):
         for coord in csv_coordinates:
             dat_file.write(f"{coord}\n")
 
-        # Escribir poligonal principal si existe
-        if polygonal_data:
-            dat_file.write("\n# Poligonal Principal\n")
-            filtered_polygonal = filter_polygonal(polygonal_data)
-            for line in filtered_polygonal:
-                dat_file.write(f"{line}\n")
-
-            # Escribir radiaciones si hay poligonal principal
-            dat_file.write("\n# Radiaciones\n")
-            filtered_radiations = filter_radiations(radiations, polygonal_data)
-            for rad in filtered_radiations:
-                dat_file.write(f"{rad}\n")
-        
-        # Escribir observaciones generales (ZD)
+        # Escribir observaciones generales (ZD y AD)
         if general_observations:
             dat_file.write("\n# Observaciones Generales\n")
             for obs in general_observations:
                 dat_file.write(f"{obs}\n")
 
-# Función para convertir ángulos de notación topográfica a GMS
-def format_angle(angle):
-    degrees = int(float(angle))
-    minutes = int((float(angle) - degrees) * 100)
-    seconds = round((((float(angle) - degrees) * 100) - minutes) * 100, 2)
-    return f"{degrees}-{minutes:02d}-{seconds:05.2f}"
+# Función para convertir ángulos de notación topográfica a GMS (extracción estricta)
+def format_topographic_angle(angle):
+    # Convertir el ángulo a flotante para manipulación
+    angle = str(angle).strip()  # Convertir el ángulo a string para manipulación
+
+    # Verificar si el ángulo tiene signo negativo
+    negative = "-" if angle.startswith("-") else ""
+    if negative:
+        angle = angle[1:]  # Eliminar el signo para manejar la parte positiva
+
+    # Asegurarse de que el ángulo tiene al menos 4 dígitos después del punto decimal
+    if '.' not in angle:
+        angle += ".00000"
+
+    # Dividir el ángulo en partes
+    degrees = angle.split('.')[0]  # Parte entera, que son los grados
+    decimal_part = angle.split('.')[1]  # Parte decimal
+    
+    # Extraer los minutos, segundos y decimales de los segundos
+    minutes = decimal_part[:2]  # Los dos primeros dígitos después del punto decimal son los minutos
+    seconds = decimal_part[2:4]  # Los dos siguientes dígitos después de los minutos son los segundos
+    decimal_seconds = decimal_part[4] if len(decimal_part) > 4 else '0'  # El siguiente dígito es el decimal de los segundos
+
+    # Eliminar ceros innecesarios: Aplicar solo para los grados
+    degrees = str(int(degrees))  # Asegurarse de que grados no tenga ceros innecesarios
+    minutes = minutes.zfill(2)  # Los minutos siempre deben tener 2 dígitos
+    seconds = seconds.zfill(2)  # Los segundos siempre deben tener 2 dígitos
+    decimal_seconds = str(int(decimal_seconds))  # Asegurarse de que los decimales de segundos no tengan ceros innecesarios
+
+    # Retornar el ángulo en formato GMS
+    return f"{negative}{degrees}-{minutes}-{seconds}.{decimal_seconds}"
 

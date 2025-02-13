@@ -237,15 +237,15 @@ class HSCSITO_ASG:
         self.dlg.fontComboBox.addItems([
             "Geomax.GSI",
             "Sanding.GSI",
-            "South_362_33",
-            "South_362_66",
+            "South_362_300",
+            "South_362_660",
             "South_345",
         ])
 
-        # Llenar fontComboBox_obs con Azimutes y Ángulos horarios
+        # Llenar fontComboBox_obs con Azimut y Ángulos horarios
         self.dlg.fontComboBox_obs.clear()
         self.dlg.fontComboBox_obs.addItems([
-            "Azimutes",
+            "Azimut",
             "Ángulos horarios",
         ])
 
@@ -289,8 +289,8 @@ class HSCSITO_ASG:
             # Iniciar la conversión y actualizar la barra de progreso
             process_data(input_file, method, output_file)
             
-            # Si el tipo de observación es "Azimutes", reemplazar AD con ZD en el archivo de salida
-            if observation_type == "Azimutes":
+            # Si el tipo de observación es "Azimut", reemplazar AD con ZD en el archivo de salida
+            if observation_type == "Azimut":
                 self.modify_output_file(output_file)
 
             # Previsualizar el archivo de salida

@@ -13,7 +13,7 @@ email=alexandraavilez267@gmail.com
 about=Este plugin está diseñado específicamente para procesar datos crudos provenientes de Estaciones Totales, con el objetivo de obtener efectividad y precisión en los cálculos de levantamientos topográficos dentro de QGIS. Ofrece herramientas avanzadas para la transformación y conversión de datos entre formatos utilizados en software especializado como Civil 3D (.fbk), Starnet (.dat) y GeoSuite (.koo y .mes), además de facilitar el cálculo preciso de coordenadas cartesianas.
 
 tracker=http://bugs
-repository=http://repo
+repository=https://github.com/HSCSITO-ASG/HSCSITO_ASG.git
 # End of mandatory metadata
 
 # Recommended items:
@@ -27,7 +27,7 @@ tags=python
 
 homepage=http://homepage
 category=Plugins
-icon=icon.png
+icon=logo_300.png
 # experimental flag
 experimental=True
 

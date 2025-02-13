@@ -81,7 +81,7 @@
        <x>10</x>
        <y>140</y>
        <width>311</width>
-       <height>16</height>
+       <height>21</height>
       </rect>
      </property>
      <property name="font">
@@ -90,7 +90,7 @@
       </font>
      </property>
      <property name="text">
-      <string> Ingrese la ruta de salida del archivo .mes</string>
+      <string>Asigne la ruta de salida del archivo .mes</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="lineEdit_salida_g">
@@ -160,7 +160,7 @@
        <x>10</x>
        <y>210</y>
        <width>311</width>
-       <height>16</height>
+       <height>21</height>
       </rect>
      </property>
      <property name="font">
@@ -169,7 +169,7 @@
       </font>
      </property>
      <property name="text">
-      <string> Ingrese la ruta de salida del archivo .koo</string>
+      <string>Asigne la ruta de salida del archivo .koo</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="lineEdit_salida_g_2">
@@ -267,7 +267,7 @@ p, li { white-space: pre-wrap; }
 &lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; font-size:9pt;&quot; style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Archivo .mes&lt;/span&gt;, que contiene las observaciones.&lt;/li&gt;
 &lt;li style=&quot; font-size:9pt;&quot; style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Archivo .koo&lt;/span&gt;, que incluye las coordenadas.&lt;/li&gt;&lt;/ul&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Es ideal para usuarios que deseen realizar ajustes de mínimos cuadrados en GeoSuite, ya que adapta los datos a los requisitos específicos del software.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;La herramienta es compatible con levantamientos realizados mediante &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;azimutes&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; o &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;ángulos horarios&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;. Además, realiza automáticamente la conversión de los ángulos de grados sexagesimales a &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;gones&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;, formato utilizado por GeoSuite, garantizando la precisión y compatibilidad de los datos.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;La herramienta es compatible con levantamientos realizados mediante &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;azimut&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; o &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;ángulos horarios&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;. Además, realiza automáticamente la conversión de los ángulos de grados sexagesimales a grados centesimales &amp;quot;&lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;gones&amp;quot;&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;, sistema utilizado por GeoSuite, garantizando la precisión y compatibilidad de los datos.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
  </widget>

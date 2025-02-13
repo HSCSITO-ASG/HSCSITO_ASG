@@ -96,19 +96,6 @@
       <string>Seleccione la estación con la cual observó</string>
      </property>
     </widget>
-    <widget class="QFontComboBox" name="fontComboBox">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>120</y>
-       <width>170</width>
-       <height>30</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_salida_2">
      <property name="geometry">
       <rect>
@@ -124,17 +111,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Seleccione el metodo de observación</string>
-     </property>
-    </widget>
-    <widget class="QFontComboBox" name="fontComboBox_obs">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>220</y>
-       <width>170</width>
-       <height>30</height>
-      </rect>
+      <string>Seleccione el método de observación</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_salida">
@@ -143,7 +120,7 @@
        <x>10</x>
        <y>270</y>
        <width>311</width>
-       <height>16</height>
+       <height>21</height>
       </rect>
      </property>
      <property name="font">
@@ -152,7 +129,7 @@
       </font>
      </property>
      <property name="text">
-      <string> Ingresa la ruta de salida del archivo .fbk</string>
+      <string> Asigne la ruta de salida del archivo .fbk</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="lineEdit_salida">
@@ -177,6 +154,61 @@
      <property name="text">
       <string>...</string>
      </property>
+    </widget>
+    <widget class="QComboBox" name="fontComboBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>130</y>
+       <width>171</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>Geomax.GSI</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Sanding.GSI</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>South_362_300</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>South_362_660</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>South_345</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QComboBox" name="fontComboBox_obs">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>220</y>
+       <width>171</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>Azimut</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Ángulos horarios</string>
+      </property>
+     </item>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
@@ -264,8 +296,8 @@
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;h3 style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;Convertir archivo crudo de observaciones a libro de campo (.fbk)&lt;/span&gt;&lt;/h3&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Esta herramienta convierte archivos crudos de observaciones de estaciones totales en un formato de libro de campo (.fbk) compatible con Civil 3D, facilitando su interpretación y análisis. Permite estructurar datos complejos donde se encuentran ángulos horarios, azimutes, ángulos verticales, distancias inclinadas, alturas del objetivo y del equipo, para correcciones y ajustes avanzados.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;El usuario debe seleccionar el método de levantamiento utilizado: &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;azimutes&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; o &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;ángulos horarios&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;, asegurando una conversión adecuada según las necesidades del proyecto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Esta herramienta convierte archivos crudos de observaciones de estaciones totales en un formato de libro de campo (.fbk) compatible con Civil 3D, facilitando su interpretación y análisis. Permite estructurar datos complejos donde se encuentran ángulos horarios, azimut, ángulos verticales, distancias inclinadas, alturas del objetivo y del equipo, para correcciones y ajustes avanzados.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;El usuario debe seleccionar el método de levantamiento utilizado: &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;azimut&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; o &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;ángulos horarios&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;, asegurando una conversión adecuada según las necesidades del proyecto.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
  </widget>

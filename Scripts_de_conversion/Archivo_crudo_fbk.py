@@ -285,8 +285,8 @@ def process_south_345(input_path, output_path):
     print(f"Archivo FBK generado en: {output_path}")
 
 
-# Función para procesar archivos South_362_66
-def process_south_362_66(input_path, output_path):
+# Función para procesar archivos South_362_660
+def process_South_362_6600(input_path, output_path):
     try:
         with open(input_path, 'r') as infile:
             lines = infile.readlines()
@@ -325,8 +325,8 @@ def process_south_362_66(input_path, output_path):
     print(f"Archivo FBK generado en: {output_path}")
 
 
-# Función para procesar archivos South_362_33
-def process_south_362_33(input_path, output_path):
+# Función para procesar archivos South_362_300
+def process_south_362_300(input_path, output_path):
     def clean_lines(input_file):
         with open(input_file, 'r') as infile:
             lines = infile.readlines()
@@ -428,8 +428,8 @@ def process_data(input_file, method, output_file):
     methods = {
         "Geomax.GSI": process_geomax_gsi,
         "Sanding.GSI": process_sanding_gsi,
-        "South_362_33": process_south_362_33,
-        "South_362_66": process_south_362_66,
+        "South_362_300": process_south_362_300,
+        "South_362_660": process_South_362_6600,
         "South_345": process_south_345,
     }
 
@@ -437,6 +437,4 @@ def process_data(input_file, method, output_file):
         raise ValueError(f"Unsupported method: {method}")
 
     methods[method](input_file, output_file)
-
-
 
