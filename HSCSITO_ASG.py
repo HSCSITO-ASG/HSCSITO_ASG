@@ -220,13 +220,10 @@ class HSCSITO_ASG:
 
     def run(self):
         """Método que realiza todo el trabajo principal"""
-
-        # Crear el cuadro de diálogo con elementos y mantener la referencia
-        # Solo crear la GUI UNA VEZ en el callback, para que solo se cargue cuando se inicie el plugin
-        if self.first_start == True:
-            self.first_start = False
-            self.dlg = HSCSITO_ASGDialog()
-
+        
+        # Crear una nueva instancia del cuadro de diálogo cada vez que se ejecuta
+        self.dlg = HSCSITO_ASGDialog()  # Nueva instancia para garantizar que no persistan los valores previos
+        
         # Asegurarse de que el cuadro de diálogo permanezca encima de la interfaz de QGIS
         self.dlg.setWindowModality(Qt.ApplicationModal)
 
@@ -266,11 +263,39 @@ class HSCSITO_ASG:
 
         # Mostrar el cuadro de diálogo
         self.dlg.show()
+
+        # Asegurarse de que los campos y valores se reinicien cuando la ventana se cierre
+        self.dlg.finished.connect(self.reset_gui)
+
         # Ejecutar el bucle de eventos del cuadro de diálogo
         result = self.dlg.exec_()
+
         # Comprobar si se presionó OK
         if result:
             pass
+
+    def reset_gui(self):
+        """Método para reiniciar la interfaz después de cerrar la ventana"""
+        # Restablecer la opción seleccionada en fontComboBox
+        self.dlg.fontComboBox.setCurrentIndex(0)
+        
+        # Restablecer la opción seleccionada en fontComboBox_obs
+        self.dlg.fontComboBox_obs.setCurrentIndex(0)
+        
+        # Limpiar la ruta de salida
+        self.dlg.lineEdit_salida.clear()
+        
+        # Limpiar la previsualización del archivo de entrada
+        self.dlg.textEdit_preview.clear()
+        
+        # Limpiar la previsualización del archivo FBK
+        self.dlg.textEdit_fbk.clear()
+        
+        # Reiniciar la barra de progreso
+        self.dlg.progressBar.setValue(0)
+        
+        # Desmarcar cualquier ejecución en progreso
+        self.dlg.processButton.setEnabled(True)
 
     def execute_conversion(self):
         """Ejecutar el proceso de conversión basado en las opciones seleccionadas."""
@@ -418,9 +443,65 @@ class HSCSITO_ASG:
         # Mostrar el diálogo
         self.dlg_2.show()
 
+        # Asegurarse de que los campos y valores se reinicien cuando la ventana se cierre
+        self.dlg_2.finished.connect(self.reset_gui2)
+
+    def reset_gui2(self):
+        """Método para reiniciar la interfaz después de cerrar la ventana"""
+        
+        # Limpiar la ruta de salida
+        self.dlg_2.lineEdit_salida_fb.clear()
+        
+        # Limpiar la ruta de los shapefiles
+        self.dlg_2.lineEdit_salida_fb_2.clear()
+        self.dlg_2.lineEdit_salida_fb_3.clear()
+        
+        # Limpiar el archivo de entrada (si es necesario)
+        self.dlg_2.mQgsFileWidget_input_fb.setFilePath('')
+        self.dlg_2.mQgsFileWidget_fb_2.setFilePath('')
+
+        # Limpiar cualquier información de ruta almacenada
+        if hasattr(self, 'selected_output_file'):
+            del self.selected_output_file
+        if hasattr(self, 'selected_point_shapefile'):
+            del self.selected_point_shapefile
+        if hasattr(self, 'selected_polyline_shapefile'):
+            del self.selected_polyline_shapefile
+
+        # Restablecer cualquier otro widget si es necesario
+        self.dlg_2.textEdit_preview_fb.clear()
+        self.clear_table()
+
+        # Reiniciar las barras de progreso
+        self.dlg_2.progressBar_fb.setValue(0)
+        self.dlg_2.progressBar_fb_2.setValue(0)
+        self.dlg_2.progressBar_fb_3.setValue(0)
+
+        # Desmarcar cualquier ejecución en progreso (si es necesario)
+        self.dlg_2.pushButton_ej.setEnabled(True)
+        self.dlg_2.pushButton_ej_fb_2.setEnabled(True)
+
+        # Restablecer los botones para que abran el cuadro de diálogo de nuevo
+        self.dlg_2.toolButton_salida_fb.setEnabled(True)
+        self.dlg_2.toolButton_salida_fb_2.setEnabled(True)
+        self.dlg_2.toolButton_salida_fb_3.setEnabled(True)
+
+        # Limpiar las rutas seleccionadas
+        self.dlg_2.lineEdit_salida_fb.setText('')
+        self.dlg_2.lineEdit_salida_fb_2.setText('')
+        self.dlg_2.lineEdit_salida_fb_3.setText('')
+
     def set_input_file(self):
         """Establecer el archivo de entrada desde mQgsFileWidget_input_fb."""
         input_file = self.dlg_2.mQgsFileWidget_input_fb.filePath()
+        
+        # Imprimir la ruta para depuración
+        print(f"Ruta del archivo de entrada: '{input_file}'")  # Esto te ayudará a ver qué ruta está siendo capturada
+
+        # Verificar si el archivo existe y si es accesible
+        if not input_file or not os.path.exists(input_file):
+            print("Error: El archivo de entrada no existe o la ruta es incorrecta.")
+            return  # Solo detener la ejecución sin mostrar un mensaje emergente
 
         # Cargar contenido en textEdit_preview_fb
         try:
@@ -428,21 +509,22 @@ class HSCSITO_ASG:
                 content = file.read()
             self.dlg_2.textEdit_preview_fb.setPlainText(content)
         except Exception as e:
-            QMessageBox.critical(self.dlg_2, "Error", f"No se pudo cargar el contenido del archivo: {e}")
+            print(f"Error al leer el archivo: {e}")  # Mostrar el error en consola en lugar de un mensaje emergente
+
 
     def set_output_file_fb_2(self):
-        """Manejar cambios en mQgsFileWidget_fb_2 y validar su contenido."""
+        """Manejar cambios en mQgsFileWidget_fb_2 y validar su contenido solo cuando el usuario seleccione una ruta de salida"""
         output_file = self.dlg_2.mQgsFileWidget_fb_2.filePath()
-        if not output_file:
-            QMessageBox.warning(self.dlg_2, "Salida inválida", "Por favor, seleccione una ruta válida para el archivo de salida.")
-            return
-
-        # Validar la existencia y el formato del archivo
-        if not os.path.isfile(output_file) or not output_file.endswith('.csv'):
-            QMessageBox.warning(self.dlg_2, "Archivo inválido", "El archivo seleccionado debe ser un archivo CSV válido.")
-            return
-
-        QMessageBox.information(self.dlg_2, "Archivo cargado", f"El archivo {output_file} se cargó correctamente.")
+        
+        # Verificar si se seleccionó un archivo de salida
+        if output_file:
+            # Validar si el archivo existe y si es del tipo correcto
+            if not os.path.isfile(output_file) or not output_file.endswith('.csv'):
+                QMessageBox.warning(self.dlg_2, "Archivo inválido", "El archivo seleccionado debe ser un archivo CSV válido.")
+                return
+        else:
+            # Si no se ha seleccionado un archivo, no hacer nada, o dar un aviso solo si se intenta procesar sin selección
+            pass
 
     def set_default_output_file_fb_2(self):
         """Establecer la ruta del archivo de salida predeterminada en mQgsFileWidget_fb_2 desde lineEdit_salida_fb."""
@@ -451,40 +533,55 @@ class HSCSITO_ASG:
             self.dlg_2.mQgsFileWidget_fb_2.setFilePath(output_file)
 
     def select_output_file_2(self):
-        """Abrir un diálogo de archivo para seleccionar la ruta del archivo de salida."""
-        output_file, _ = QFileDialog.getSaveFileName(
-            self.iface.mainWindow(),
-            "Guardar archivo CSV",
-            "",
-            "Archivos CSV (*.csv)"
-        )
+        """Abrir un diálogo de archivo para seleccionar la ruta del archivo de salida solo una vez."""
+        if not hasattr(self, 'selected_output_file') or self.selected_output_file is None:  # Solo abrir el diálogo si no se ha seleccionado una ruta
+            output_file, _ = QFileDialog.getSaveFileName(
+                self.iface.mainWindow(),
+                "Guardar archivo CSV",
+                "",
+                "Archivos CSV (*.csv)"
+            )
 
-        if output_file:
-            self.dlg_2.lineEdit_salida_fb.setText(output_file)
+            if output_file:
+                self.selected_output_file = output_file  # Guardar la ruta seleccionada
+                self.dlg_2.lineEdit_salida_fb.setText(output_file)
+        else:
+            # Ya se ha seleccionado una ruta, mostrarla sin abrir el cuadro de diálogo
+            self.dlg_2.lineEdit_salida_fb.setText(self.selected_output_file)
 
     def select_point_shapefile(self):
-        """Seleccionar la ruta del archivo de salida para el shapefile de puntos."""
-        point_shapefile, _ = QFileDialog.getSaveFileName(
-            self.iface.mainWindow(),
-            "Guardar shapefile de puntos",
-            "",
-            "Shapefiles (*.shp)"
-        )
+        """Seleccionar la ruta del archivo de salida para el shapefile de puntos solo una vez."""
+        if not hasattr(self, 'selected_point_shapefile') or self.selected_point_shapefile is None:  # Solo abrir el diálogo si no se ha seleccionado una ruta
+            point_shapefile, _ = QFileDialog.getSaveFileName(
+                self.iface.mainWindow(),
+                "Guardar shapefile de puntos",
+                "",
+                "Shapefiles (*.shp)"
+            )
 
-        if point_shapefile:
-            self.dlg_2.lineEdit_salida_fb_2.setText(point_shapefile)
+            if point_shapefile:
+                self.selected_point_shapefile = point_shapefile  # Guardar la ruta seleccionada
+                self.dlg_2.lineEdit_salida_fb_2.setText(point_shapefile)
+        else:
+            # Ya se ha seleccionado una ruta, mostrarla sin abrir el cuadro de diálogo
+            self.dlg_2.lineEdit_salida_fb_2.setText(self.selected_point_shapefile)
 
     def select_polyline_shapefile(self):
-        """Seleccionar la ruta del archivo de salida para el shapefile de polilíneas."""
-        polyline_shapefile, _ = QFileDialog.getSaveFileName(
-            self.iface.mainWindow(),
-            "Guardar shapefile de polilíneas",
-            "",
-            "Shapefiles (*.shp)"
-        )
+        """Seleccionar la ruta del archivo de salida para el shapefile de polilíneas solo una vez."""
+        if not hasattr(self, 'selected_polyline_shapefile') or self.selected_polyline_shapefile is None:  # Solo abrir el diálogo si no se ha seleccionado una ruta
+            polyline_shapefile, _ = QFileDialog.getSaveFileName(
+                self.iface.mainWindow(),
+                "Guardar shapefile de polilíneas",
+                "",
+                "Shapefiles (*.shp)"
+            )
 
-        if polyline_shapefile:
-            self.dlg_2.lineEdit_salida_fb_3.setText(polyline_shapefile)
+            if polyline_shapefile:
+                self.selected_polyline_shapefile = polyline_shapefile  # Guardar la ruta seleccionada
+                self.dlg_2.lineEdit_salida_fb_3.setText(polyline_shapefile)
+        else:
+            # Ya se ha seleccionado una ruta, mostrarla sin abrir el cuadro de diálogo
+            self.dlg_2.lineEdit_salida_fb_3.setText(self.selected_polyline_shapefile)
 
     def clear_table(self):
         """Limpiar todos los valores del widget de la tabla."""
@@ -594,52 +691,108 @@ class HSCSITO_ASG:
 
     def run_fbk_a_starnet(self):
         """Método para ejecutar la conversión de FBK a Starnet"""
-
-        # Crear el cuadro de diálogo con elementos y mantener la referencia
-        # Solo crear la interfaz gráfica UNA VEZ en el callback, para que solo se cargue cuando se inicie el plugin
-        if not hasattr(self, 'dlg_3') or self.dlg_3 is None:
-            self.dlg_3 = HSCSITO_ASGDialog_3()
-
+        
+        # Crear una nueva instancia del cuadro de diálogo cada vez que se ejecuta
+        self.dlg_3 = HSCSITO_ASGDialog_3()  # Nueva instancia para garantizar que no persistan los valores previos
+        
+        # Asegurarse de que el cuadro de diálogo permanezca encima de la interfaz de QGIS
+        self.dlg_3.setWindowModality(Qt.ApplicationModal)
+        
         # Conectar mQgsFileWidget_input_d para establecer el archivo FBK de entrada
         self.dlg_3.mQgsFileWidget_input_d.fileChanged.connect(self.set_input_fbk_file)
-
+        
         # Conectar mQgsFileWidget_input_d_2 para establecer el archivo CSV de entrada
         self.dlg_3.mQgsFileWidget_input_d_2.fileChanged.connect(self.set_input_csv_file)
-
+        
         # Conectar toolButton_salida_d para abrir un cuadro de diálogo para guardar el archivo DAT de salida
         self.dlg_3.toolButton_salida_d.clicked.connect(self.select_output_dat_file)
-
+        
         # Conectar processButton_d para ejecutar la herramienta
         self.dlg_3.processButton_d.clicked.connect(self.execute_conversion_4)
-
+        
         # Inicializar progressBar_d a cero
         self.dlg_3.progressBar_d.setValue(0)
-
+        
         # Mostrar el cuadro de diálogo
         self.dlg_3.show()
+
+        # Asegurarse de que los campos y valores se reinicien cuando la ventana se cierre
+        self.dlg_3.finished.connect(self.reset_gui3)
+
+        # Ejecutar el bucle de eventos del cuadro de diálogo
+        result = self.dlg_3.exec_()
+        
+        # Comprobar si se presionó OK
+        if result:
+            pass
+
+    def reset_gui3(self):
+        """Método para reiniciar la interfaz después de cerrar la ventana"""
+        
+        # Limpiar las rutas de salida y los campos de texto
+        self.dlg_3.lineEdit_salida_d.clear()
+
+        # Limpiar los archivos de entrada (FBK y CSV)
+        self.dlg_3.mQgsFileWidget_input_d.setFilePath('')
+        self.dlg_3.mQgsFileWidget_input_d_2.setFilePath('')
+        
+        # Limpiar cualquier ruta seleccionada almacenada
+        self.selected_output_dat_file = None
+        self.selected_fbk_file = None
+        self.selected_csv_file = None
+
+        # Limpiar el contenido de los previsualizadores de archivo
+        self.dlg_3.textEdit_preview_d.clear()
+        self.dlg_3.textEdit_d_2.clear()
+
+        # Reiniciar las barras de progreso
+        self.dlg_3.progressBar_d.setValue(0)
+
+        # Habilitar botones y campos de texto para nuevas entradas
+        self.dlg_3.toolButton_salida_d.setEnabled(True)
 
     def set_input_fbk_file(self):
         """Cargar el contenido del archivo FBK seleccionado en textEdit_preview_d."""
         input_file_3 = self.dlg_3.mQgsFileWidget_input_d.filePath()
-        if not input_file_3:
-            QMessageBox.warning(self.dlg_3, "Entrada inválida", "Por favor, seleccione un archivo FBK válido.")
-            return
 
-        try:
-            with open(input_file_3, 'r') as file:
-                content = file.read()
-            self.dlg_3.textEdit_preview_d.setPlainText(content)
-        except Exception as e:
-            QMessageBox.critical(self.dlg_3, "Error", f"No se pudo cargar el contenido del archivo: {e}")
+        # Validación solo cuando se haya seleccionado un archivo
+        if input_file_3:
+            if input_file_3.endswith('.fbk') and os.path.isfile(input_file_3):
+                try:
+                    # Si el archivo es válido, cargar su contenido
+                    with open(input_file_3, 'r') as file:
+                        content = file.read()
+                    self.dlg_3.textEdit_preview_d.setPlainText(content)
+                except Exception as e:
+                    QMessageBox.critical(self.dlg_3, "Error", f"No se pudo cargar el contenido del archivo: {e}")
+            else:
+                # Si el archivo no es válido, mostrar el mensaje de alerta
+                QMessageBox.warning(self.dlg_3, "Entrada inválida", "Por favor, seleccione un archivo FBK válido.")
+                self.dlg_3.mQgsFileWidget_input_d.setFilePath('')  # Limpiar el campo
+        else:
+            # Si no se ha seleccionado ningún archivo, no hacer nada
+            pass
 
     def set_input_csv_file(self):
         """Validar el archivo CSV seleccionado."""
         input_file_3 = self.dlg_3.mQgsFileWidget_input_d_2.filePath()
-        if not input_file_3 or not input_file_3.endswith('.csv'):
-            QMessageBox.warning(self.dlg_3, "Entrada inválida", "Por favor, seleccione un archivo CSV válido.")
+
+        # Validación solo cuando se haya seleccionado un archivo CSV
+        if input_file_3:
+            if input_file_3.endswith('.csv') and os.path.isfile(input_file_3):
+                # Aquí puedes proceder con lo que necesitas hacer con el archivo CSV
+                pass
+            else:
+                # Si el archivo no es válido, mostrar el mensaje de alerta
+                QMessageBox.warning(self.dlg_3, "Entrada inválida", "Por favor, seleccione un archivo CSV válido.")
+                self.dlg_3.mQgsFileWidget_input_d_2.setFilePath('')  # Limpiar el campo
+        else:
+            # Si no se ha seleccionado ningún archivo, no hacer nada
+            pass
+
 
     def select_output_dat_file(self):
-        """Abrir un cuadro de diálogo para seleccionar la ruta del archivo DAT de salida."""
+        """Abrir un cuadro de diálogo para seleccionar la ruta del archivo DAT de salida cada vez que se presione el botón."""
         output_file, _ = QFileDialog.getSaveFileName(
             self.iface.mainWindow(),
             "Guardar archivo DAT",
@@ -706,49 +859,89 @@ class HSCSITO_ASG:
         # Mostrar el cuadro de diálogo
         self.dlg_4.show()
 
+        # Asegurarse de que los campos y valores se reinicien cuando la ventana se cierre
+        self.dlg_4.finished.connect(self.reset_gui_4)
+
+    def reset_gui_4(self):
+        """Método para reiniciar la interfaz después de cerrar la ventana"""
+        # Restablecer la opción seleccionada en los QComboBox y demás widgets
+        self.dlg_4.mQgsFileWidget_input_g.setFilePath('')
+        self.dlg_4.mQgsFileWidget_input_g_2.setFilePath('')
+        self.dlg_4.lineEdit_salida_g.clear()
+        self.dlg_4.lineEdit_salida_g_2.clear()
+        self.dlg_4.textEdit_preview_g.clear()
+        self.dlg_4.textEdit_g.clear()
+        self.dlg_4.textEdit_g_2.clear()
+
+        # Reiniciar las barras de progreso
+        self.dlg_4.progressBar_g.setValue(0)
+
+        # Habilitar botones si es necesario
+        self.dlg_4.processButton_g.setEnabled(True)
+        self.dlg_4.toolButton_salida_g.setEnabled(True)
+        self.dlg_4.toolButton_salida_g_2.setEnabled(True)
+
+
     def set_input_fbk_file_g(self):
         """Cargar el contenido del archivo FBK seleccionado en textEdit_preview_g."""
         input_file = self.dlg_4.mQgsFileWidget_input_g.filePath()
-        if not input_file:
-            QMessageBox.warning(self.dlg_4, "Entrada inválida", "Por favor, seleccione un archivo FBK válido.")
-            return
-
-        try:
-            with open(input_file, 'r') as file:
-                content = file.read()
-            self.dlg_4.textEdit_preview_g.setPlainText(content)
-        except Exception as e:
-            QMessageBox.critical(self.dlg_4, "Error", f"No se pudo cargar el contenido del archivo: {e}")
+        
+        # Verificar si el archivo se ha seleccionado antes de hacer la validación
+        if input_file and input_file != '':
+            try:
+                with open(input_file, 'r') as file:
+                    content = file.read()
+                self.dlg_4.textEdit_preview_g.setPlainText(content)
+            except Exception as e:
+                QMessageBox.critical(self.dlg_4, "Error", f"No se pudo cargar el contenido del archivo: {e}")
+        else:
+            # Aquí no mostramos la alerta, solo verificamos cuando sea necesario
+            pass
 
     def set_input_csv_file_g(self):
         """Validar el archivo CSV seleccionado."""
         input_file = self.dlg_4.mQgsFileWidget_input_g_2.filePath()
-        if not input_file or not input_file.endswith('.csv'):
+        
+        # Solo hacer la validación si el archivo ha sido seleccionado
+        if input_file and input_file.endswith('.csv'):
+            pass  # No hacemos nada si es un archivo CSV válido
+        elif input_file:  # Si se seleccionó un archivo pero no es un CSV, mostramos la alerta
             QMessageBox.warning(self.dlg_4, "Entrada inválida", "Por favor, seleccione un archivo CSV válido.")
 
     def select_output_mes_file(self):
-        """Abrir un cuadro de diálogo para seleccionar la ruta del archivo MES de salida."""
-        output_file, _ = QFileDialog.getSaveFileName(
-            self.iface.mainWindow(),
-            "Guardar archivo MES",
-            "",
-            "Archivos MES (*.mes)"
-        )
+        """Abrir un cuadro de diálogo para seleccionar la ruta del archivo MES de salida solo si no se ha seleccionado previamente."""
+        # Verificar si ya hay una ruta seleccionada
+        if self.dlg_4.lineEdit_salida_g.text() == "":  # Si no hay ruta seleccionada
+            output_file, _ = QFileDialog.getSaveFileName(
+                self.iface.mainWindow(),
+                "Guardar archivo MES",
+                "",
+                "Archivos MES (*.mes)"
+            )
 
-        if output_file:
-            self.dlg_4.lineEdit_salida_g.setText(output_file)
+            if output_file:  # Si el usuario selecciona una ruta
+                self.dlg_4.lineEdit_salida_g.setText(output_file)  # Asignar la ruta al campo de texto
+        else:
+            # Si ya hay una ruta seleccionada, no hacemos nada
+            pass
 
     def select_output_koo_file(self):
-        """Abrir un cuadro de diálogo para seleccionar la ruta del archivo KOO de salida."""
-        output_file, _ = QFileDialog.getSaveFileName(
-            self.iface.mainWindow(),
-            "Guardar archivo KOO",
-            "",
-            "Archivos KOO (*.koo)"
-        )
+        """Abrir un cuadro de diálogo para seleccionar la ruta del archivo KOO de salida solo si no se ha seleccionado previamente."""
+        # Verificar si ya hay una ruta seleccionada
+        if self.dlg_4.lineEdit_salida_g_2.text() == "":  # Si no hay ruta seleccionada
+            output_file, _ = QFileDialog.getSaveFileName(
+                self.iface.mainWindow(),
+                "Guardar archivo KOO",
+                "",
+                "Archivos KOO (*.koo)"
+            )
 
-        if output_file:
-            self.dlg_4.lineEdit_salida_g_2.setText(output_file)
+            if output_file:  # Si el usuario selecciona una ruta
+                self.dlg_4.lineEdit_salida_g_2.setText(output_file)  # Asignar la ruta al campo de texto
+        else:
+            # Si ya hay una ruta seleccionada, no hacemos nada
+            pass
+
 
     def execute_geosuite_conversion(self):
         """Ejecutar las conversiones de FBK a MES y CSV a KOO."""
